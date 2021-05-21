@@ -1,0 +1,23 @@
+#!/bin/bash
+
+mkdir -p "${PWD}/rstudio-data"
+
+docker network create --driver bridge "IEE045_net" 2>/dev/null
+
+docker run --detach \
+  --restart=always \
+  --name "IEE045-rstudio" \
+  --memory 4G --memory-reservation=256m \
+  --network "IEE045_net" \
+  -v "${PWD}/rstudio-data":/home/rstudio \
+  -p '127.0.0.1:8787:8787' \
+  -e ROOT='true' \
+  -e DISABLE_AUTH='true' \
+  -e ADD='shiny' \
+  rocker/rstudio:latest
+
+
+## Para resolver o problema do `plot` (https://github.com/rocker-org/rocker-versioned/issues/234)
+docker exec -it IEE045-rstudio sudo apt update
+docker exec -it IEE045-rstudio sudo apt install libxtst6 -y
+
